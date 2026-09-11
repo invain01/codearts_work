@@ -3,5 +3,6 @@ __pycache__/
 app.db
 static/uploads/
 tests/
+target/
 .git/
 .gitignore
