@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}通知{% endblock %}
+{% block content %}
+<h1 class="section-title">我的通知</h1>
+<ul class="notice-list">
+  {% for note in notifications %}
+    <li>
+      <p>{{ note.content }}</p>
+      <span>{{ note.create_time.strftime('%Y-%m-%d %H:%M') }}</span>
+    </li>
+  {% else %}
+    <li class="empty">暂无通知</li>
+  {% endfor %}
+</ul>
+{% endblock %}

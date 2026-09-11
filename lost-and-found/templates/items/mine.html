@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}我的发布{% endblock %}
+{% block content %}
+<h1 class="section-title">我的发布</h1>
+
+<h2 class="section-title">我的失物（{{ lost_items|length }}）</h2>
+<table class="table">
+  <thead><tr><th>名称</th><th>状态</th><th>发布时间</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for item in lost_items %}
+    <tr>
+      <td><a href="{{ url_for('item_detail', item_type='lost', item_id=item.id) }}">{{ item.title }}</a></td>
+      <td><span class="badge status-{{ item.status }}">{{ ITEM_STATUS['lost'][item.status] }}</span></td>
+      <td>{{ item.create_time.strftime('%Y-%m-%d') }}</td>
+      <td>
+        {% if item.status == 'open' %}
+        <form method="post" action="{{ url_for('close_item', item_type='lost', item_id=item.id) }}">
+          <button class="btn btn-sm" type="submit">标记已找回</button>
+        </form>
+        {% else %}-{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="empty">暂无记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2 class="section-title">我的招领（{{ found_items|length }}）</h2>
+<table class="table">
+  <thead><tr><th>名称</th><th>状态</th><th>发布时间</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for item in found_items %}
+    <tr>
+      <td><a href="{{ url_for('item_detail', item_type='found', item_id=item.id) }}">{{ item.title }}</a></td>
+      <td><span class="badge status-{{ item.status }}">{{ ITEM_STATUS['found'][item.status] }}</span></td>
+      <td>{{ item.create_time.strftime('%Y-%m-%d') }}</td>
+      <td>
+        {% if item.status == 'open' %}
+        <form method="post" action="{{ url_for('close_item', item_type='found', item_id=item.id) }}">
+          <button class="btn btn-sm" type="submit">标记已归还</button>
+        </form>
+        {% else %}-{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="empty">暂无记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

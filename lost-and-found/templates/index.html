@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% from "_macros.html" import item_card with context %}
+{% block content %}
+<section class="hero">
+  <h1>拾光 · 校园失物招领</h1>
+  <p>丢失的物品，在这里等它回家</p>
+  <form class="search-bar" method="get" action="{{ url_for('items') }}">
+    <input type="hidden" name="type" value="lost">
+    <input type="text" name="q" placeholder="输入物品名称，如：校园卡、耳机、钥匙">
+    <button class="btn btn-primary" type="submit">搜索</button>
+  </form>
+  <div class="hero-actions">
+    <a class="btn" href="{{ url_for('publish', item_type='lost') }}">我丢了东西</a>
+    <a class="btn" href="{{ url_for('publish', item_type='found') }}">我捡到东西</a>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="stat"><strong>{{ stats.lost }}</strong><span>失物信息</span></div>
+  <div class="stat"><strong>{{ stats.found }}</strong><span>招领信息</span></div>
+  <div class="stat"><strong>{{ stats.closed }}</strong><span>成功归还</span></div>
+  <div class="stat"><strong>{{ stats.users }}</strong><span>注册用户</span></div>
+</section>
+
+<div class="two-columns">
+  <section>
+    <h2 class="section-title">最新失物</h2>
+    {% for item in latest_lost %}
+      {{ item_card(item, 'lost') }}
+    {% else %}
+      <p class="empty">暂无失物信息</p>
+    {% endfor %}
+    <a class="more" href="{{ url_for('items', type='lost') }}">查看全部 →</a>
+  </section>
+  <section>
+    <h2 class="section-title">最新招领</h2>
+    {% for item in latest_found %}
+      {{ item_card(item, 'found') }}
+    {% else %}
+      <p class="empty">暂无招领信息</p>
+    {% endfor %}
+    <a class="more" href="{{ url_for('items', type='found') }}">查看全部 →</a>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}管理后台{% endblock %}
+{% block content %}
+<h1 class="section-title">管理后台</h1>
+
+<section class="stats">
+  <div class="stat"><strong>{{ stats.users }}</strong><span>用户</span></div>
+  <div class="stat"><strong>{{ stats.lost }}</strong><span>失物</span></div>
+  <div class="stat"><strong>{{ stats.found }}</strong><span>招领</span></div>
+  <div class="stat"><strong>{{ stats.claims }}</strong><span>认领申请</span></div>
+  <div class="stat"><strong>{{ stats.closed }}</strong><span>已完成</span></div>
+</section>
+
+<section>
+  <h2 class="section-title">分类管理</h2>
+  <form class="inline-form" method="post" action="{{ url_for('add_category') }}">
+    <input type="text" name="name" placeholder="新分类名称" required>
+    <button class="btn btn-primary" type="submit">添加分类</button>
+  </form>
+  <div class="tags">
+    {% for category in categories %}<span class="tag">{{ category.name }}</span>{% endfor %}
+  </div>
+</section>
+
+<section>
+  <h2 class="section-title">分类招领数量</h2>
+  <table class="table">
+    <thead><tr><th>分类</th><th>招领数量</th></tr></thead>
+    <tbody>
+    {% for name, count in distribution %}
+      <tr><td>{{ name }}</td><td>{{ count }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2 class="section-title">失物信息管理</h2>
+  <table class="table">
+    <thead><tr><th>ID</th><th>名称</th><th>发布者</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for item in lost_items %}
+      <tr>
+        <td>{{ item.id }}</td>
+        <td><a href="{{ url_for('item_detail', item_type='lost', item_id=item.id) }}">{{ item.title }}</a></td>
+        <td>{{ item.owner.username }}</td>
+        <td><span class="badge status-{{ item.status }}">{{ ITEM_STATUS['lost'][item.status] }}</span></td>
+        <td>
+          {% if item.status != 'removed' %}
+          <form method="post" action="{{ url_for('remove_item', item_type='lost', item_id=item.id) }}">
+            <button class="btn btn-sm" type="submit">下架</button>
+          </form>
+          {% else %}-{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="empty">暂无记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2 class="section-title">招领信息管理</h2>
+  <table class="table">
+    <thead><tr><th>ID</th><th>名称</th><th>发布者</th><th>状态</th><th>操作</th></tr></thead>
+    <tbody>
+    {% for item in found_items %}
+      <tr>
+        <td>{{ item.id }}</td>
+        <td><a href="{{ url_for('item_detail', item_type='found', item_id=item.id) }}">{{ item.title }}</a></td>
+        <td>{{ item.owner.username }}</td>
+        <td><span class="badge status-{{ item.status }}">{{ ITEM_STATUS['found'][item.status] }}</span></td>
+        <td>
+          {% if item.status != 'removed' %}
+          <form method="post" action="{{ url_for('remove_item', item_type='found', item_id=item.id) }}">
+            <button class="btn btn-sm" type="submit">下架</button>
+          </form>
+          {% else %}-{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="empty">暂无记录</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

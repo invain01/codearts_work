@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% from "_macros.html" import item_card with context %}
+{% block title %}{{ item.title }}{% endblock %}
+{% block content %}
+<article class="detail">
+  <div class="detail-main">
+    <h1>{{ item.title }} <span class="badge status-{{ item.status }}">{{ ITEM_STATUS[item_type][item.status] }}</span></h1>
+    <ul class="meta-list">
+      <li><span>分类</span>{{ item.category.name if item.category else '未分类' }}</li>
+      <li><span>{{ '丢失时间' if item_type == 'lost' else '拾获时间' }}</span>{% if item_type == 'lost' %}{{ item.lost_time or '未知' }}{% else %}{{ item.found_time or '未知' }}{% endif %}</li>
+      <li><span>地点</span>{{ item.place or '未知' }}</li>
+      <li><span>发布者</span>{{ item.owner.username }}{% if item.owner.contact %}（{{ item.owner.contact }}）{% endif %}</li>
+      <li><span>发布时间</span>{{ item.create_time.strftime('%Y-%m-%d %H:%M') }}</li>
+    </ul>
+    <p class="detail-desc">{{ item.description or '暂无描述' }}</p>
+    {% if images %}
+    <div class="images">
+      {% for image in images %}
+        <img src="{{ url_for('static', filename='uploads/' + image.path) }}" alt="物品图片">
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="detail-side">
+    {% if current_user and item.status == 'open' and (item.user_id == current_user.id or current_user.is_admin) %}
+    <form method="post" action="{{ url_for('close_item', item_type=item_type, item_id=item.id) }}">
+      <button class="btn btn-block" type="submit">{{ '标记已找回' if item_type == 'lost' else '标记已归还' }}</button>
+    </form>
+    {% endif %}
+
+    {% if item_type == 'found' and item.status == 'open' and current_user and item.user_id != current_user.id %}
+    <form class="claim-form" method="post" action="{{ url_for('submit_claim', found_id=item.id) }}">
+      <h3>申请认领</h3>
+      <textarea name="feature_desc" rows="4" placeholder="请描述物品特征以便核验，如颜色、划痕、内含物等" required></textarea>
+      <button class="btn btn-primary btn-block" type="submit">提交申请</button>
+    </form>
+    {% endif %}
+
+    {% if not current_user and item_type == 'found' and item.status == 'open' %}
+    <p class="empty">登录后可申请认领</p>
+    {% endif %}
+  </aside>
+</article>
+
+{% if claims and current_user and (item.user_id == current_user.id or current_user.is_admin) %}
+<section>
+  <h2 class="section-title">认领申请记录</h2>
+  <table class="table">
+    <thead><tr><th>申请人</th><th>特征说明</th><th>状态</th><th>申请时间</th></tr></thead>
+    <tbody>
+    {% for claim in claims %}
+      <tr>
+        <td>{{ claim.applicant.username }}</td>
+        <td>{{ claim.feature_desc }}</td>
+        <td><span class="badge claim-{{ claim.status }}">{{ CLAIM_STATUS[claim.status] }}</span></td>
+        <td>{{ claim.create_time.strftime('%Y-%m-%d %H:%M') }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if matches %}
+<section>
+  <h2 class="section-title">可能匹配的招领信息</h2>
+  <div class="cards">
+    {% for match in matches %}
+      {{ item_card(match, 'found') }}
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

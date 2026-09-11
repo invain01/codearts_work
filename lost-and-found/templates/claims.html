@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}认领管理{% endblock %}
+{% block content %}
+<h1 class="section-title">认领管理</h1>
+
+<h2 class="section-title">收到的认领申请</h2>
+<table class="table">
+  <thead><tr><th>物品</th><th>申请人</th><th>特征说明</th><th>状态</th><th>操作</th></tr></thead>
+  <tbody>
+  {% for claim in received %}
+    <tr>
+      <td><a href="{{ url_for('item_detail', item_type='found', item_id=claim.found_item.id) }}">{{ claim.found_item.title }}</a></td>
+      <td>{{ claim.applicant.username }}</td>
+      <td>{{ claim.feature_desc }}</td>
+      <td><span class="badge claim-{{ claim.status }}">{{ CLAIM_STATUS[claim.status] }}</span></td>
+      <td>
+        {% if claim.status == 'pending' %}
+        <form class="inline" method="post" action="{{ url_for('audit_claim', claim_id=claim.id) }}">
+          <button class="btn btn-sm btn-primary" name="action" value="approve" type="submit">通过</button>
+          <button class="btn btn-sm" name="action" value="reject" type="submit">拒绝</button>
+        </form>
+        {% else %}-{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5" class="empty">暂无收到的申请</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2 class="section-title">我提交的申请</h2>
+<table class="table">
+  <thead><tr><th>物品</th><th>特征说明</th><th>状态</th><th>申请时间</th></tr></thead>
+  <tbody>
+  {% for claim in applied %}
+    <tr>
+      <td><a href="{{ url_for('item_detail', item_type='found', item_id=claim.found_item.id) }}">{{ claim.found_item.title }}</a></td>
+      <td>{{ claim.feature_desc }}</td>
+      <td><span class="badge claim-{{ claim.status }}">{{ CLAIM_STATUS[claim.status] }}</span></td>
+      <td>{{ claim.create_time.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" class="empty">暂无申请记录</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

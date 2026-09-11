@@ -1,0 +1,14 @@
+{% macro item_card(item, item_type) %}
+<article class="card item-card">
+  <a class="item-title" href="{{ url_for('item_detail', item_type=item_type, item_id=item.id) }}">{{ item.title }}</a>
+  <div class="item-meta">
+    <span class="badge status-{{ item.status }}">{{ ITEM_STATUS[item_type][item.status] }}</span>
+    {% if item.category %}<span class="tag">{{ item.category.name }}</span>{% endif %}
+  </div>
+  <p class="item-desc">{{ item.description or '暂无描述' }}</p>
+  <div class="item-foot">
+    <span>{{ item.place or '地点未知' }}</span>
+    <span>{% if item_type == 'lost' %}{{ item.lost_time or '时间未知' }}{% else %}{{ item.found_time or '时间未知' }}{% endif %}</span>
+  </div>
+</article>
+{% endmacro %}

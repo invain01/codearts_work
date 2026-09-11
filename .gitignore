@@ -1,2 +1,6 @@
 基于CodeArts的凤凰商城项目开发实验指导手册.pdf
 软件工程专业实训2026.pdf
+__pycache__/
+*.pyc
+lost-and-found/app.db
+lost-and-found/static/uploads/

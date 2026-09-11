@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}拾光 · 校园失物招领{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="container nav">
+    <a class="brand" href="{{ url_for('index') }}">拾光 · 校园失物招领</a>
+    <nav>
+      <a href="{{ url_for('items', type='lost') }}">失物</a>
+      <a href="{{ url_for('items', type='found') }}">招领</a>
+      <a href="{{ url_for('publish', item_type='lost') }}">发布失物</a>
+      <a href="{{ url_for('publish', item_type='found') }}">发布招领</a>
+      {% if current_user %}
+        <a href="{{ url_for('my_items') }}">我的发布</a>
+        <a href="{{ url_for('my_claims') }}">认领管理</a>
+        <a href="{{ url_for('notifications') }}">通知{% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}</a>
+        {% if current_user.is_admin %}<a href="{{ url_for('admin') }}">管理后台</a>{% endif %}
+        <a href="{{ url_for('profile') }}">{{ current_user.username }}</a>
+        <a href="{{ url_for('logout') }}">退出</a>
+      {% else %}
+        <a href="{{ url_for('login') }}">登录</a>
+        <a href="{{ url_for('register') }}">注册</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">拾光 · 校园失物招领系统 · 软件工程实训项目</footer>
+</body>
+</html>

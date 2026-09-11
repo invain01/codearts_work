@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}个人资料{% endblock %}
+{% block content %}
+<h1 class="section-title">个人资料</h1>
+<form class="form-card" method="post">
+  <label>用户名<input type="text" value="{{ current_user.username }}" disabled></label>
+  <label>角色<input type="text" value="{{ '管理员' if current_user.is_admin else '普通用户' }}" disabled></label>
+  <label>联系方式<input type="text" name="contact" value="{{ current_user.contact or '' }}" placeholder="手机号或邮箱，便于失主/拾获者联系"></label>
+  <button class="btn btn-primary" type="submit">保存</button>
+</form>
+{% endblock %}

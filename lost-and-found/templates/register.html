@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}注册{% endblock %}
+{% block content %}
+<form class="form-card form-narrow" method="post">
+  <h1>注册</h1>
+  <label>用户名<input type="text" name="username" minlength="3" maxlength="20" required></label>
+  <label>密码<input type="password" name="password" minlength="6" required></label>
+  <label>联系方式（选填）<input type="text" name="contact" placeholder="手机号或邮箱，便于失主联系"></label>
+  <button class="btn btn-primary btn-block" type="submit">注册</button>
+  <p class="form-tip">已有账号？<a href="{{ url_for('login') }}">去登录</a></p>
+</form>
+{% endblock %}

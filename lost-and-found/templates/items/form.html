@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}发布{{ '失物' if item_type == 'lost' else '招领' }}{% endblock %}
+{% block content %}
+<h1 class="section-title">发布{{ '失物信息' if item_type == 'lost' else '招领信息' }}</h1>
+<form class="form-card" method="post" enctype="multipart/form-data">
+  <label>物品名称 *<input type="text" name="title" maxlength="100" required></label>
+  <label>物品分类
+    <select name="category_id">
+      <option value="">请选择</option>
+      {% for category in nav_categories %}
+        <option value="{{ category.id }}">{{ category.name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>{{ '丢失时间' if item_type == 'lost' else '拾获时间' }}<input type="date" name="item_time"></label>
+  <label>地点<input type="text" name="place" maxlength="100" placeholder="如：图书馆三楼自习区"></label>
+  <label>详细描述<textarea name="description" rows="5" placeholder="颜色、品牌、特殊标记等"></textarea></label>
+  <label>物品图片（可多选）<input type="file" name="images" accept="image/*" multiple></label>
+  <button class="btn btn-primary" type="submit">发布</button>
+</form>
+{% endblock %}

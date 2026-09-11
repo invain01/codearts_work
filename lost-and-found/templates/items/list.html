@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import item_card with context %}
+{% block title %}{{ '失物信息' if item_type == 'lost' else '招领信息' }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ '失物信息' if item_type == 'lost' else '招领信息' }}</h1>
+  <a class="btn btn-primary" href="{{ url_for('publish', item_type=item_type) }}">发布{{ '失物' if item_type == 'lost' else '招领' }}</a>
+</div>
+
+<div class="tabs">
+  <a class="{{ 'active' if item_type == 'lost' }}" href="{{ url_for('items', type='lost') }}">失物</a>
+  <a class="{{ 'active' if item_type == 'found' }}" href="{{ url_for('items', type='found') }}">招领</a>
+</div>
+
+<form class="filter-form" method="get" action="{{ url_for('items') }}">
+  <input type="hidden" name="type" value="{{ item_type }}">
+  <input type="text" name="q" value="{{ filters.keyword }}" placeholder="物品名称/描述">
+  <select name="category">
+    <option value="">全部分类</option>
+    {% for category in nav_categories %}
+      <option value="{{ category.id }}" {{ 'selected' if filters.category_id == category.id }}>{{ category.name }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" name="place" value="{{ filters.place }}" placeholder="地点">
+  <input type="date" name="date_from" value="{{ filters.date_from }}">
+  <input type="date" name="date_to" value="{{ filters.date_to }}">
+  <button class="btn btn-primary" type="submit">筛选</button>
+</form>
+
+<div class="cards">
+  {% for item in pagination.items %}
+    {{ item_card(item, item_type) }}
+  {% else %}
+    <p class="empty">没有找到符合条件的信息</p>
+  {% endfor %}
+</div>
+
+{% if pagination.pages > 1 %}
+<nav class="pagination">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for('items', type=item_type, q=filters.keyword, category=filters.category_id, place=filters.place, date_from=filters.date_from, date_to=filters.date_to, page=pagination.prev_num) }}">上一页</a>
+  {% endif %}
+  <span>第 {{ pagination.page }} / {{ pagination.pages }} 页</span>
+  {% if pagination.has_next %}
+    <a href="{{ url_for('items', type=item_type, q=filters.keyword, category=filters.category_id, place=filters.place, date_from=filters.date_from, date_to=filters.date_to, page=pagination.next_num) }}">下一页</a>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}
