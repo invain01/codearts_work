@@ -1,0 +1,10 @@
+version: "3"
+services:
+  lost-found:
+    image: swr.cn-north-4.myhuaweicloud.com/in_vain/default:default
+    container_name: lost-found
+    ports:
+      - "5000:5000"
+    volumes:
+      - /opt/lost-found/data:/data
+    restart: always
