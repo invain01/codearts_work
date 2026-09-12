@@ -80,8 +80,12 @@ def inject_globals():
 
 @app.route("/")
 def index():
-    latest_lost = item_service.search_items("lost", per_page=6).items
-    latest_found = item_service.search_items("found", per_page=6).items
+    latest_lost = item_service.search_items(
+        item_service.ItemQuery(item_type="lost", per_page=6)
+    ).items
+    latest_found = item_service.search_items(
+        item_service.ItemQuery(item_type="found", per_page=6)
+    ).items
     return render_template(
         "index.html",
         latest_lost=latest_lost,
@@ -135,18 +139,16 @@ def items():
     item_type = request.args.get("type", "lost")
     if item_type not in ("lost", "found"):
         item_type = "lost"
-    filters = {
-        "keyword": (request.args.get("q") or "").strip(),
-        "category_id": request.args.get("category", type=int),
-        "place": (request.args.get("place") or "").strip(),
-        "date_from": (request.args.get("date_from") or "").strip(),
-        "date_to": (request.args.get("date_to") or "").strip(),
-    }
-    pagination = item_service.search_items(
-        item_type,
+    filters = item_service.ItemQuery(
+        item_type=item_type,
+        keyword=(request.args.get("q") or "").strip(),
+        category_id=request.args.get("category", type=int),
+        place=(request.args.get("place") or "").strip(),
+        date_from=(request.args.get("date_from") or "").strip(),
+        date_to=(request.args.get("date_to") or "").strip(),
         page=request.args.get("page", 1, type=int),
-        **filters,
     )
+    pagination = item_service.search_items(filters)
     return render_template(
         "items/list.html",
         item_type=item_type,
@@ -335,12 +337,14 @@ def not_found(_error):
 
 def seed_defaults():
     if not Category.query.first():
-        for index, name in enumerate(DEFAULT_CATEGORIES):
-            db.session.add(Category(name=name, sort=index))
+        for sort_order, category_name in enumerate(DEFAULT_CATEGORIES):
+            db.session.add(Category(name=category_name, sort=sort_order))
     if not User.query.filter_by(username="admin").first():
-        admin = User(username="admin", role="admin", contact="admin@example.com")
-        admin.set_password("admin123")
-        db.session.add(admin)
+        admin_user = User(
+            username="admin", role="admin", contact="admin@example.com"
+        )
+        admin_user.set_password("admin123")
+        db.session.add(admin_user)
     db.session.commit()
 
 
@@ -348,7 +352,7 @@ def seed_defaults():
 def init_db_command():
     db.create_all()
     seed_defaults()
-    print("数据库初始化完成")
+    app.logger.info("数据库初始化完成")
 
 
 with app.app_context():

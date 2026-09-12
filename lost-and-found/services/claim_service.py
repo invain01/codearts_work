@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from models import Claim, FoundItem, db
+from models import Claim, FoundItem, db, now_cst
 from services import notification_service
 
 
@@ -37,7 +35,7 @@ def submit_claim(user, found_item, feature_desc):
 def audit_claim(operator, claim, approve):
     if claim.status != "pending":
         return "该申请已处理"
-    now = datetime.now()
+    now = now_cst()
     title = claim.found_item.title
     claim.status = "approved" if approve else "rejected"
     claim.auditor_id = operator.id

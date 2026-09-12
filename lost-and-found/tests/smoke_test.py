@@ -1,10 +1,13 @@
 """冒烟测试：覆盖注册、发布、检索、认领、审核、通知、后台等核心流程。"""
+import logging
 import os
 import sys
 import tempfile
 
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT)
+sys.path.append(ROOT)
 
 TMP_DIR = tempfile.mkdtemp(prefix="lostfound-test-")
 os.environ["DATABASE_URI"] = "sqlite:///" + os.path.join(TMP_DIR, "test.db")
@@ -112,8 +115,8 @@ def main():
     ]
     for test in tests:
         test()
-        print(f"PASS {test.__name__}")
-    print(f"全部通过（{len(tests)} 项）")
+        logging.info("PASS %s", test.__name__)
+    logging.info("全部通过（%d 项）", len(tests))
 
 
 if __name__ == "__main__":

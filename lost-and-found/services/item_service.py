@@ -1,12 +1,26 @@
 import os
 import uuid
+from dataclasses import dataclass
 from datetime import datetime
 from difflib import SequenceMatcher
+from typing import Optional
 
 from flask import current_app
 from sqlalchemy import or_, select
 
 from models import Category, FoundItem, ItemImage, LostItem, db
+
+
+@dataclass
+class ItemQuery:
+    item_type: str
+    keyword: str = ""
+    category_id: Optional[int] = None
+    place: str = ""
+    date_from: str = ""
+    date_to: str = ""
+    page: int = 1
+    per_page: int = 8
 
 
 def list_categories():
@@ -20,34 +34,27 @@ def parse_date(value):
         return None
 
 
-def search_items(
-    item_type,
-    keyword="",
-    category_id=None,
-    place="",
-    date_from="",
-    date_to="",
-    page=1,
-    per_page=8,
-):
-    model = LostItem if item_type == "lost" else FoundItem
-    date_col = model.lost_time if item_type == "lost" else model.found_time
+def search_items(query):
+    model = LostItem if query.item_type == "lost" else FoundItem
+    date_col = model.lost_time if query.item_type == "lost" else model.found_time
     stmt = select(model).where(model.status != "removed")
-    if keyword:
-        like = f"%{keyword}%"
+    if query.keyword:
+        like = f"%{query.keyword}%"
         stmt = stmt.where(or_(model.title.like(like), model.description.like(like)))
-    if category_id:
-        stmt = stmt.where(model.category_id == category_id)
-    if place:
-        stmt = stmt.where(model.place.like(f"%{place}%"))
-    start = parse_date(date_from)
-    end = parse_date(date_to)
+    if query.category_id:
+        stmt = stmt.where(model.category_id == query.category_id)
+    if query.place:
+        stmt = stmt.where(model.place.like(f"%{query.place}%"))
+    start = parse_date(query.date_from)
+    end = parse_date(query.date_to)
     if start:
         stmt = stmt.where(date_col >= start)
     if end:
         stmt = stmt.where(date_col <= end)
     stmt = stmt.order_by(model.create_time.desc())
-    return db.paginate(stmt, page=page, per_page=per_page, error_out=False)
+    return db.paginate(
+        stmt, page=query.page, per_page=query.per_page, error_out=False
+    )
 
 
 def get_item(item_type, item_id):
@@ -124,6 +131,12 @@ def set_status(item_type, item_id, status):
     return item
 
 
+def _places_overlap(first, second):
+    if not first or not second:
+        return False
+    return first in second or second in first
+
+
 def suggest_matches(lost_item, limit=5):
     candidates = FoundItem.query.filter_by(
         category_id=lost_item.category_id, status="open"
@@ -133,14 +146,7 @@ def suggest_matches(lost_item, limit=5):
         score = SequenceMatcher(
             None, lost_item.title or "", candidate.title or ""
         ).ratio()
-        if (
-            lost_item.place
-            and candidate.place
-            and (
-                lost_item.place in candidate.place
-                or candidate.place in lost_item.place
-            )
-        ):
+        if _places_overlap(lost_item.place, candidate.place):
             score += 0.5
         if score >= 0.5:
             scored.append((score, candidate))
